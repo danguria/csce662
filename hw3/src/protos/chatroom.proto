@@ -1,0 +1,95 @@
+// Copyright 2015 gRPC authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package hw2;
+
+import "google/protobuf/timestamp.proto";
+
+service ChatRoomService {
+
+  rpc GetServerAddr (Request) returns (Reply) {}
+  rpc Login (Request) returns (Reply) {}
+  rpc List (Request) returns (ListReply) {}
+  rpc Join (Request) returns (Reply) {}
+  rpc Leave (Request) returns (Reply) {}
+  rpc ServerAlive (Request) returns (Reply) {}
+  // Bidirectional streaming RPC
+  rpc Chat (stream Message) returns (stream Message) {}
+
+  // for the p2p comm
+  rpc MasterHeartbeats(Process) returns (Process) {}
+  rpc SlaveWatchdog(Process) returns (Process) {}
+  rpc Election(Vote) returns (Reply) {}
+  rpc NotifyNewLocalMaster(ServerInfo) returns (Reply) {}
+  rpc NotifyNewLocalSlave(ServerInfo) returns (Reply) {}
+  rpc NotifyNewNetMaster(ServerInfo) returns (Reply) {}
+  rpc GetNetMasterChatAddress(ServerInfo) returns (ServerInfo) {}
+
+  // for the voting set alg.
+  rpc OnRequestedLock(ReqLock) returns (ReqLock) {}
+  rpc OnReleasedLock(Process) returns (Process) {}
+
+  // for the data consistency
+  rpc OnDataUpdated(Command) returns (Reply) {}
+}
+
+message Command {
+    string command = 1;
+    int32 pid = 2;
+}
+
+message ReqLock {
+    int32 pid = 1;
+    string time = 2;
+}
+message ListReply {
+  repeated string all_rooms = 1;
+  repeated string joined_rooms = 2;
+}
+
+message Request {
+  string username = 1;
+  repeated string arguments = 2;
+}
+
+message Reply {
+  string msg = 1;
+  string cmds = 2;
+  string clock = 3;
+  int32 id = 4;
+}
+
+message ServerInfo {
+    string addr= 1;
+    int32 dead_pid = 2;
+    int32 new_pid = 3;
+}
+
+message Message {
+  //Username who sent the message
+  string username = 1;
+  //Message from the user
+  string msg = 2;
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+message Process {
+    int32 pid = 1;
+}
+
+message Vote {
+    int32 id = 1;
+}
